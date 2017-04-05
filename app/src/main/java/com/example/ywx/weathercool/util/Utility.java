@@ -5,8 +5,6 @@ import android.text.TextUtils;
 import com.example.ywx.weathercool.database.City;
 import com.example.ywx.weathercool.database.Country;
 import com.example.ywx.weathercool.database.Province;
-import com.google.gson.JsonArray;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
