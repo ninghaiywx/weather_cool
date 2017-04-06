@@ -1,6 +1,7 @@
 package com.example.ywx.weathercool;
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import com.example.ywx.weathercool.database.City;
 import com.example.ywx.weathercool.database.Country;
 import com.example.ywx.weathercool.database.Province;
+import com.example.ywx.weathercool.gson.Weather;
 import com.example.ywx.weathercool.util.HttpUtil;
 import com.example.ywx.weathercool.util.Utility;
 
@@ -43,7 +45,6 @@ public class ChooseAreaFragment extends Fragment {
     private static final int LEVEL_PROVINCE=0;
     private static final int LEVEL_CITY=1;
     private static final int LEVEL_COUNTRY=2;
-    private ProgressDialog progressDialog=null;
     private TextView titleText;
     private Button backButton;
     private ListView listView;
@@ -61,9 +62,7 @@ public class ChooseAreaFragment extends Fragment {
         titleText=(TextView)view.findViewById(R.id.title_text);
         backButton=(Button)view.findViewById(R.id.back_button);
         listView=(ListView)view.findViewById(R.id.list_view);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            adapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1,datalist);
-        }
+            adapter=new ArrayAdapter<>(getActivity(),android.R.layout.simple_list_item_1,datalist);
         listView.setAdapter(adapter);
         return view;
     }
@@ -76,12 +75,27 @@ public class ChooseAreaFragment extends Fragment {
                 if(selectedLevel==LEVEL_PROVINCE)
                 {
                     selectedProvince=provinceList.get(position);
-                    Log.d(TAG,selectedProvince.getId()+"");
                     queryCities();
                 }else if(selectedLevel==LEVEL_CITY)
                 {
                     selectedCity=cityList.get(position);
                     queryCountries();
+                }else if(selectedLevel==LEVEL_COUNTRY)
+                {
+                    String weatherId=countryList.get(position).getWeatherId();
+                    if(getActivity() instanceof MainActivity) {
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }
+                    else if(getActivity() instanceof WeatherActivity)
+                    {
+                        WeatherActivity activity=(WeatherActivity)getActivity();
+                        activity.getDrawerLayout().closeDrawers();
+                        activity.getRefreshLayout().setRefreshing(true);
+                        activity.requestWeather(weatherId);
+                    }
                 }
             }
         });
@@ -143,6 +157,7 @@ public class ChooseAreaFragment extends Fragment {
         }
         else
         {
+            Log.d(TAG,"数据库空");
             String address="http://guolin.tech/api/china";
             queryFromServer(address,"province");
         }
@@ -157,7 +172,7 @@ public class ChooseAreaFragment extends Fragment {
             datalist.clear();
             for(Country country:countryList)
             {
-                datalist.add(country.getCountryName());
+                    datalist.add(country.getCountryName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
@@ -179,16 +194,14 @@ public class ChooseAreaFragment extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        closeProgressDialog();
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            Toast.makeText(getContext(),"加载失败",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(),"加载失败",Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                showProgressDialog();
                 String responseText=response.body().string();
                 boolean flag=false;
                 if("province".equals(type))
@@ -206,7 +219,6 @@ public class ChooseAreaFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            closeProgressDialog();
                             if("province".equals(type))
                             {
                                 queryProvinces();
@@ -222,23 +234,5 @@ public class ChooseAreaFragment extends Fragment {
                 }
             }
         });
-    }
-    private void showProgressDialog()
-    {
-        if(progressDialog==null)
-        {
-            Looper.prepare();
-            progressDialog=new ProgressDialog(getActivity());
-            progressDialog.setMessage("正在加载...");
-            progressDialog.setCanceledOnTouchOutside(false);
-        }
-        progressDialog.show();
-    }
-    private void closeProgressDialog()
-    {
-        if(progressDialog!=null)
-        {
-            progressDialog.dismiss();
-        }
     }
 }
