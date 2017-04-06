@@ -50,6 +50,7 @@ public class WeatherActivity extends AppCompatActivity {
     private ImageView bingPicImg;
     private LinearLayout aqiLayout;
     private SwipeRefreshLayout refreshLayout;
+    private String mweatherId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,20 +80,19 @@ public class WeatherActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
         loadBingPic();
-        final String weatherId;
         if (weatherString != null) {
             Weather weather = Utility.handleWeatherResponse(weatherString);
-            weatherId=weather.basic.weatherId;
+            mweatherId=weather.basic.weatherId;
             showWeatherInfo(weather);
         } else
         {
-            weatherId=getIntent().getStringExtra("weather_id");
-            requestWeather(weatherId);
+            mweatherId=getIntent().getStringExtra("weather_id");
+            requestWeather(mweatherId);
         }
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                requestWeather(weatherId);
+                requestWeather(mweatherId);
             }
         });
         navButton.setOnClickListener(new View.OnClickListener() {
@@ -131,7 +131,7 @@ public class WeatherActivity extends AppCompatActivity {
     {
         return refreshLayout;
     }
-    public void requestWeather(String weatherId)
+    public void requestWeather(final String weatherId)
     {
         String weatherUrl="http://guolin.tech/api/weather?cityid="+weatherId+"&key=35f26d28c8eb49928bea3ea792ce24ed";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
@@ -157,6 +157,7 @@ public class WeatherActivity extends AppCompatActivity {
                            SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
                             editor.putString("weather",responseText);
                             editor.apply();
+                            mweatherId=weather.basic.weatherId;
                             showWeatherInfo(weather);
                             refreshLayout.setRefreshing(false);
                         }else
@@ -177,7 +178,7 @@ public class WeatherActivity extends AppCompatActivity {
         String weatherInfo=weather.now.more.info;
         titleCity.setText(cityName);
         titleUpdateTime.setText(updateTime);
-        degreeText.setText(degree);
+        degreeText.setText(degree+"℃");
         weatherinfoText.setText(weatherInfo);
         forecastLayout.removeAllViews();
         for(Forecast forecast:weather.forecastList)
@@ -189,12 +190,13 @@ public class WeatherActivity extends AppCompatActivity {
             TextView maxText=(TextView)view.findViewById(R.id.max_text);
             dateTime.setText(forecast.date);
             infoText.setText(forecast.more.info);
-            minText.setText(forecast.temperature.min);
-            maxText.setText(forecast.temperature.max);
+            minText.setText(forecast.temperature.min+"℃");
+            maxText.setText(forecast.temperature.max+"℃");
             forecastLayout.addView(view);
         }
         if(weather.aqi!=null)
         {
+            aqiLayout.setVisibility(View.VISIBLE);
             aqiText.setText(weather.aqi.city.aqi);
             pm25Text.setText(weather.aqi.city.pm25);
         }
