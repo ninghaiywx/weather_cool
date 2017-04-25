@@ -1,6 +1,7 @@
 package com.example.ywx.weathercool.util;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.example.ywx.weathercool.database.City;
 import com.example.ywx.weathercool.database.Country;

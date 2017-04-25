@@ -1,7 +1,13 @@
 package com.example.ywx.weathercool;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -51,9 +57,15 @@ public class WeatherActivity extends AppCompatActivity {
     private LinearLayout aqiLayout;
     private SwipeRefreshLayout refreshLayout;
     private String mweatherId;
+    private IntentFilter filter;
+    private NetworkChangeReceiver networkChangeReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        networkChangeReceiver=new NetworkChangeReceiver();
+        filter=new IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(networkChangeReceiver,filter);
         if(Build.VERSION.SDK_INT>=21)
         {
             View decorView=getWindow().getDecorView();
@@ -79,7 +91,6 @@ public class WeatherActivity extends AppCompatActivity {
         refreshLayout.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
-        loadBingPic();
         if (weatherString != null) {
             Weather weather = Utility.handleWeatherResponse(weatherString);
             mweatherId=weather.basic.weatherId;
@@ -141,6 +152,7 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this,"获取天气信息失败.",Toast.LENGTH_SHORT).show();
+                        refreshLayout.setRefreshing(false);
                     }
                 });
             }
@@ -211,5 +223,29 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText.setText(carWash);
         sportText.setText(sport);
     }
+    class NetworkChangeReceiver extends BroadcastReceiver
+    {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager connectivityManager=(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo=connectivityManager.getActiveNetworkInfo();
+            if(networkInfo!=null&&networkInfo.isAvailable())
+            {
+                Toast.makeText(context,"网络已连接",Toast.LENGTH_SHORT).show();
+                loadBingPic();
+                refreshLayout.setRefreshing(true);
+                requestWeather(mweatherId);
+            }
+            else
+            {
+                Toast.makeText(context,"当前网络不可用",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkChangeReceiver);
+    }
 }
