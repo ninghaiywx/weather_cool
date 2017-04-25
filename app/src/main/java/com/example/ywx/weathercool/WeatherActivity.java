@@ -1,5 +1,7 @@
 package com.example.ywx.weathercool;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +33,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.ywx.weathercool.gson.Forecast;
 import com.example.ywx.weathercool.gson.Weather;
+import com.example.ywx.weathercool.service.AutoUpdateService;
 import com.example.ywx.weathercool.util.HttpUtil;
 import com.example.ywx.weathercool.util.Utility;
 
@@ -222,6 +225,8 @@ public class WeatherActivity extends AppCompatActivity {
         comfortText.setText(comfort);
         carWashText.setText(carWash);
         sportText.setText(sport);
+        Intent intent=new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
     class NetworkChangeReceiver extends BroadcastReceiver
     {
@@ -242,7 +247,6 @@ public class WeatherActivity extends AppCompatActivity {
             }
         }
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
