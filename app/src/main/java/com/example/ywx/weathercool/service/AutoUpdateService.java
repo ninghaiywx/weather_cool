@@ -54,7 +54,7 @@ public class AutoUpdateService extends Service {
         Intent i=new Intent(this,AutoUpdateService.class);
         PendingIntent pendingIntent=PendingIntent.getService(this,0,i,0);
         manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,updateTime,pendingIntent);
-        return super.onStartCommand(intent,flags,startId);
+        return START_STICKY;
     }
 
     private void updateWeather() {
