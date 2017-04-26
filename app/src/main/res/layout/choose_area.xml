@@ -15,13 +15,14 @@
             android:textSize="20sp"
             android:textColor="#fff"/>
         <Button
+            android:layout_marginTop="25dp"
             android:id="@+id/back_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginLeft="10dp"
-            android:layout_centerVertical="true"
             android:background="@mipmap/ic_back"/>
     </RelativeLayout>
+
     <ListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"

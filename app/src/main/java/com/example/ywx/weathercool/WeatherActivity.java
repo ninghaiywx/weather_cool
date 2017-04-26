@@ -103,6 +103,27 @@ public class WeatherActivity extends AppCompatActivity {
             mweatherId=getIntent().getStringExtra("weather_id");
             requestWeather(mweatherId);
         }
+        drawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                navButton.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                navButton.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -192,7 +213,7 @@ public class WeatherActivity extends AppCompatActivity {
         String degree=weather.now.temperature;
         String weatherInfo=weather.now.more.info;
         titleCity.setText(cityName);
-        titleUpdateTime.setText(updateTime);
+        titleUpdateTime.setText("天气网更新: "+updateTime);
         degreeText.setText(degree+"℃");
         weatherinfoText.setText(weatherInfo);
         forecastLayout.removeAllViews();
