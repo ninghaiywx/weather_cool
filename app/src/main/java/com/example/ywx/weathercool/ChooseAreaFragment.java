@@ -64,9 +64,13 @@ public class ChooseAreaFragment extends Fragment {
         titleText=(TextView)view.findViewById(R.id.title_text);
         backButton=(Button)view.findViewById(R.id.back_button);
         listView=(ListView)view.findViewById(R.id.list_view);
-            adapter=new ArrayAdapter<>(getActivity(),R.layout.item_text,datalist);
+        adapter=new ArrayAdapter<>(getActivity(),R.layout.item_text,datalist);
         listView.setAdapter(adapter);
         return view;
+    }
+    public void backToMenu()
+    {
+        queryProvinces();
     }
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {

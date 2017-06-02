@@ -1,5 +1,6 @@
 package com.example.ywx.weathercool;
 
+import android.app.Fragment;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -112,6 +113,8 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onDrawerOpened(View drawerView) {
                 navButton.setVisibility(View.INVISIBLE);
+                ChooseAreaFragment fragment=(ChooseAreaFragment)getFragmentManager().findFragmentById(R.id.choose_area_fragment);
+                fragment.backToMenu();
             }
 
             @Override
